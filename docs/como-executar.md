@@ -58,13 +58,13 @@ O executável fica em `target/release/raycopy`. Para rodar:
 cargo test
 ```
 
-Devem passar 12 testes, cobrindo detecção de linguagem, highlight, formatação, renderização do SVG/PNG e sanitização do nome do arquivo.
+Devem passar 13 testes, cobrindo detecção de linguagem, highlight, formatação, renderização do SVG/PNG e sanitização do nome do arquivo.
 
 ## 5. Usando o aplicativo
 
 1. Cole ou digite o código no editor.
 2. Ajuste título, subtítulo, idioma (Auto-Detect, C#, HTML, CSS ou JavaScript), tema (Candy ou Sand), modo escuro, fundo, números de linha, padding, fonte, janela, largura e linhas em destaque (ex.: `2-4,7`).
-3. Use **Format Code** para reindentar o código.
+3. Use **Format Code** para formatar o código, inclusive quando ele estiver compactado em uma única linha.
 4. Exporte com o botão **Export as PNG**, ou pelo menu de opções:
    - **Save PNG** / **Save SVG**: abre o diálogo para escolher onde salvar.
    - **Copy Image**: copia a imagem para a área de transferência.

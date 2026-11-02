@@ -307,207 +307,232 @@ fn is_css_declaration(line: &str) -> bool {
 // Formatting
 // ---------------------------------------------------------------------------
 
-/// Conservative re-indenter. Only leading/trailing whitespace and blank-line runs change;
-/// the content of each line is kept byte-for-byte. Idempotent.
+/// Formats the supported languages with a small, dependency-free formatter.
+///
+/// This is intentionally not a full compiler/parser. It understands the constructs that
+/// matter for a code image: strings, comments, brackets, statements and HTML tags. It can
+/// therefore expand compact or minified input while avoiding changes inside strings/comments.
+/// The result is idempotent, which is important when the button is pressed repeatedly.
 pub fn format_code(code: &str, language: Language) -> String {
     let language = resolve(language, code);
-    let code = code.replace('\t', "  ");
-
-    let mut out: Vec<String> = Vec::new();
-    let mut pending_blank = false;
-    let mut depth: i64 = 0;
-
     match language {
-        Language::Html => format_html(&code, &mut out, &mut pending_blank),
-        _ => {
-            let unit = if language == Language::CSharp { "    " } else { "  " };
-            let css = language == Language::Css;
-            let mut scan = ScanState::default();
-            for raw in code.split('\n') {
-                let line = raw.strip_suffix('\r').unwrap_or(raw);
-
-                if scan.in_multiline() {
-                    // Inside a block comment or template literal: keep the text untouched.
-                    flush_blank(&mut out, &mut pending_blank);
-                    out.push(line.to_string());
-                    depth = (depth + scan.scan_line(line, css)).max(0);
-                    continue;
-                }
-
-                let t = line.trim();
-                if t.is_empty() {
-                    pending_blank = !out.is_empty();
-                    continue;
-                }
-
-                flush_blank(&mut out, &mut pending_blank);
-                let closes_first = t.starts_with(['}', ']', ')']);
-                let level = if closes_first { (depth - 1).max(0) } else { depth.max(0) };
-                out.push(format!("{}{}", unit.repeat(level as usize), t));
-                depth = (depth + scan.scan_line(t, css)).max(0);
-            }
+        Language::Html => format_html(&code.replace('\t', "  ")),
+        Language::CSharp | Language::Css | Language::JavaScript => {
+            format_braced(&code.replace('\t', "  "), language)
         }
+        Language::Auto => unreachable!("format_code resolves Auto before formatting"),
     }
+}
 
-    while out.last().is_some_and(|l| l.is_empty()) {
-        out.pop();
+fn indent_for(language: Language, depth: usize) -> String {
+    let unit = if language == Language::CSharp { "    " } else { "  " };
+    unit.repeat(depth)
+}
+
+fn format_braced(code: &str, language: Language) -> String {
+    let chars: Vec<char> = code.chars().collect();
+    let mut out = Vec::new();
+    let mut current = String::new();
+    let mut depth = 0usize;
+    let mut parens = 0usize;
+    let mut brackets = 0usize;
+    let mut quote: Option<char> = None;
+    let mut escaped = false;
+    let mut line_comment = false;
+    let mut block_comment = false;
+
+    let flush = |out: &mut Vec<String>, current: &mut String, depth: usize, language: Language| {
+        let text = current.trim();
+        if !text.is_empty() {
+            out.push(format!("{}{}", indent_for(language, depth), text));
+        }
+        current.clear();
+    };
+
+    let mut i = 0;
+    while i < chars.len() {
+        let c = chars[i];
+
+        if line_comment {
+            if c == '\n' {
+                flush(&mut out, &mut current, depth, language);
+                line_comment = false;
+            } else {
+                current.push(c);
+            }
+            i += 1;
+            continue;
+        }
+
+        if block_comment {
+            current.push(c);
+            if c == '*' && chars.get(i + 1) == Some(&'/') {
+                current.push('/');
+                block_comment = false;
+                i += 2;
+                continue;
+            }
+            if c == '\n' {
+                flush(&mut out, &mut current, depth, language);
+            }
+            i += 1;
+            continue;
+        }
+
+        if let Some(delimiter) = quote {
+            current.push(c);
+            if escaped {
+                escaped = false;
+            } else if c == '\\' {
+                escaped = true;
+            } else if c == delimiter {
+                quote = None;
+            }
+            i += 1;
+            continue;
+        }
+
+        if c == '"' || c == '\'' || (c == '`' && language == Language::JavaScript) {
+            quote = Some(c);
+            current.push(c);
+            i += 1;
+            continue;
+        }
+        if c == '/' && chars.get(i + 1) == Some(&'/') {
+            current.push_str("//");
+            line_comment = true;
+            i += 2;
+            continue;
+        }
+        if c == '/' && chars.get(i + 1) == Some(&'*') {
+            current.push_str("/*");
+            block_comment = true;
+            i += 2;
+            continue;
+        }
+
+        match c {
+            '{' => {
+                if !current.is_empty() && !current.ends_with(char::is_whitespace) {
+                    current.push(' ');
+                }
+                current.push('{');
+                flush(&mut out, &mut current, depth, language);
+                depth += 1;
+            }
+            '}' => {
+                flush(&mut out, &mut current, depth, language);
+                depth = depth.saturating_sub(1);
+                out.push(format!("{}}}", indent_for(language, depth)));
+            }
+            ';' => {
+                current.push(';');
+                if parens == 0 && brackets == 0 {
+                    flush(&mut out, &mut current, depth, language);
+                }
+            }
+            '(' => {
+                parens += 1;
+                current.push(c);
+            }
+            ')' => {
+                parens = parens.saturating_sub(1);
+                current.push(c);
+            }
+            '[' => {
+                brackets += 1;
+                current.push(c);
+            }
+            ']' => {
+                brackets = brackets.saturating_sub(1);
+                current.push(c);
+            }
+            '\n' | '\r' => {
+                if c == '\n' {
+                    flush(&mut out, &mut current, depth, language);
+                }
+            }
+            c if c.is_whitespace() => {
+                if !current.ends_with(char::is_whitespace) {
+                    current.push(' ');
+                }
+            }
+            _ => current.push(c),
+        }
+        i += 1;
     }
+    flush(&mut out, &mut current, depth, language);
     out.join("\n")
 }
 
-fn flush_blank(out: &mut Vec<String>, pending_blank: &mut bool) {
-    if *pending_blank {
-        out.push(String::new());
-        *pending_blank = false;
-    }
-}
-
-/// Tracks constructs that span lines (block comments, template literals) and bracket depth
-/// changes within a single line, ignoring brackets inside strings and comments.
-#[derive(Default)]
-struct ScanState {
-    in_block_comment: bool,
-    in_template: bool,
-}
-
-impl ScanState {
-    fn in_multiline(&self) -> bool {
-        self.in_block_comment || self.in_template
-    }
-
-    /// Returns the net bracket depth change of `line`, updating the multi-line state.
-    fn scan_line(&mut self, line: &str, css: bool) -> i64 {
-        let chars: Vec<char> = line.chars().collect();
-        let mut delta = 0i64;
-        let mut i = 0usize;
-        while i < chars.len() {
-            if self.in_block_comment {
-                if chars[i] == '*' && chars.get(i + 1) == Some(&'/') {
-                    self.in_block_comment = false;
-                    i += 2;
-                } else {
-                    i += 1;
-                }
-                continue;
-            }
-            if self.in_template {
-                match chars[i] {
-                    '\\' => i += 2,
-                    '`' => {
-                        self.in_template = false;
-                        i += 1;
-                    }
-                    _ => i += 1,
-                }
-                continue;
-            }
-            let c = chars[i];
-            match c {
-                '/' if chars.get(i + 1) == Some(&'*') => {
-                    self.in_block_comment = true;
-                    i += 2;
-                }
-                '/' if !css && chars.get(i + 1) == Some(&'/') => break,
-                '"' | '\'' => {
-                    // Skip the string literal; unterminated strings end at the line end.
-                    i += 1;
-                    while i < chars.len() {
-                        if chars[i] == '\\' {
-                            i += 2;
-                        } else if chars[i] == c {
-                            i += 1;
-                            break;
-                        } else {
-                            i += 1;
-                        }
-                    }
-                }
-                '`' if !css => {
-                    self.in_template = true;
-                    i += 1;
-                }
-                '{' | '[' | '(' => {
-                    delta += 1;
-                    i += 1;
-                }
-                '}' | ']' | ')' => {
-                    delta -= 1;
-                    i += 1;
-                }
-                _ => i += 1,
-            }
-        }
-        delta
-    }
-}
-
-/// HTML: indents by tag depth when the markup is simple enough; otherwise keeps the
-/// author's indentation (only trailing whitespace and blank runs are changed).
-fn format_html(code: &str, out: &mut Vec<String>, pending_blank: &mut bool) {
-    let simple = html_is_simple(code);
-    let mut depth: i64 = 0;
-    for raw in code.split('\n') {
-        let line = raw.strip_suffix('\r').unwrap_or(raw);
-        let t = line.trim();
-        if t.is_empty() {
-            *pending_blank = !out.is_empty();
-            continue;
-        }
-        flush_blank(out, pending_blank);
-        if simple {
-            let closes_first = t.starts_with("</");
-            let level = if closes_first { (depth - 1).max(0) } else { depth.max(0) };
-            out.push(format!("{}{}", "  ".repeat(level as usize), t));
-            depth = (depth + html_tag_delta(t)).max(0);
-        } else {
-            out.push(line.trim_end().to_string());
-        }
-    }
-}
-
-/// Simple HTML: no raw-text elements or comments, and every line has balanced `<` / `>`.
-fn html_is_simple(code: &str) -> bool {
-    let lower = code.to_ascii_lowercase();
-    if ["<pre", "<textarea", "<script", "<style", "<!--"].iter().any(|t| lower.contains(t)) {
-        return false;
-    }
-    code.split('\n').all(|line| {
-        line.matches('<').count() == line.matches('>').count()
-    })
-}
-
-/// Net tag-depth change of one line of simple HTML.
-fn html_tag_delta(line: &str) -> i64 {
+fn format_html(code: &str) -> String {
     const VOID: [&str; 14] = [
         "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source",
         "track", "wbr",
     ];
-    let mut delta = 0i64;
-    let mut rest = line;
-    while let Some(lt) = rest.find('<') {
-        let after = &rest[lt + 1..];
-        let Some(gt) = after.find('>') else { break };
-        let inner = &after[..gt];
-        rest = &after[gt + 1..];
-        if inner.starts_with('!') || inner.starts_with('?') {
+    let mut out = Vec::new();
+    let mut text = String::new();
+    let mut tag = String::new();
+    let mut in_tag = false;
+    let mut quote = None;
+    let mut depth = 0usize;
+
+    let flush_text = |out: &mut Vec<String>, text: &mut String, depth: usize| {
+        let value = text.trim();
+        if !value.is_empty() {
+            out.push(format!("{}{}", "  ".repeat(depth), value));
+        }
+        text.clear();
+    };
+
+    for c in code.chars() {
+        if !in_tag {
+            if c == '<' {
+                flush_text(&mut out, &mut text, depth);
+                in_tag = true;
+                tag.push(c);
+            } else {
+                text.push(c);
+            }
             continue;
         }
-        if inner.starts_with('/') {
-            delta -= 1;
-        } else if inner.ends_with('/') {
-            // self-closing
-        } else {
+
+        tag.push(c);
+        if let Some(delimiter) = quote {
+            if c == delimiter {
+                quote = None;
+            }
+        } else if c == '"' || c == '\'' {
+            quote = Some(c);
+        } else if c == '>' {
+            let value = tag.trim();
+            let inner = value.trim_start_matches('<').trim_end_matches('>').trim();
+            let closing = inner.starts_with('/');
+            let special = inner.starts_with('!') || inner.starts_with('?');
+            let self_closing = inner.ends_with('/');
             let name = inner
-                .split(|c: char| c.is_whitespace())
+                .trim_start_matches('/')
+                .split(|c: char| c.is_whitespace() || c == '/')
                 .next()
                 .unwrap_or("")
                 .to_ascii_lowercase();
-            if !VOID.contains(&name.as_str()) {
-                delta += 1;
+
+            if closing {
+                depth = depth.saturating_sub(1);
             }
+            out.push(format!("{}{}", "  ".repeat(depth), value));
+            if !closing && !special && !self_closing && !VOID.contains(&name.as_str()) {
+                depth += 1;
+            }
+            tag.clear();
+            in_tag = false;
         }
     }
-    delta
+    if in_tag {
+        text.push_str(&tag);
+    }
+    flush_text(&mut out, &mut text, depth);
+    out.join("\n")
 }
 
 // ---------------------------------------------------------------------------
@@ -618,6 +643,30 @@ mod tests {
         assert_eq!(out, "function f() {\n  return 1;\n}");
         let out = format_code("class A\n{\nvoid M()\n{\n}\n}", Language::CSharp);
         assert_eq!(out, "class A\n{\n    void M()\n    {\n    }\n}");
+    }
+
+    #[test]
+    fn format_expands_compact_code_in_all_supported_languages() {
+        let js = format_code("function greet(name){return `Hello, ${name}!`;}", Language::JavaScript);
+        assert_eq!(js, "function greet(name) {\n  return `Hello, ${name}!`;\n}");
+
+        let csharp = format_code("class A{void M(){return;}}", Language::CSharp);
+        assert_eq!(csharp, "class A {\n    void M() {\n        return;\n    }\n}");
+
+        let css = format_code(".card{color:red;margin:0 auto;}", Language::Css);
+        assert_eq!(css, ".card {\n  color:red;\n  margin:0 auto;\n}");
+
+        let html = format_code("<div><p>Hello</p><img src=\"x.png\"></div>", Language::Html);
+        assert_eq!(html, "<div>\n  <p>\n    Hello\n  </p>\n  <img src=\"x.png\">\n</div>");
+
+        for (code, lang) in [
+            (js, Language::JavaScript),
+            (csharp, Language::CSharp),
+            (css, Language::Css),
+            (html, Language::Html),
+        ] {
+            assert_eq!(format_code(&code, lang), code);
+        }
     }
 }
 
