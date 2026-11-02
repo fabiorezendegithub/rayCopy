@@ -3,6 +3,7 @@ name = "raycopy"
 version = "0.1.0"
 edition = "2021"
 description = "rayCopy: create beautiful images of your code (a Rust port of ray.so)"
+license = "MIT"
 
 [dependencies]
 tauri = { version = "2", features = [] }

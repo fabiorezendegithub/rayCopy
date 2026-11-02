@@ -79,3 +79,7 @@ rayCopy/
 ## Créditos
 
 Inspirado no [ray.so](https://ray.so) da Raycast.
+
+## Licença
+
+[MIT](LICENSE)
