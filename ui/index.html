@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>rayCopy</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"></span>
+      <span class="brand-name">rayCopy</span>
+    </div>
+
+    <div class="top-actions">
+      <button id="aboutBtn" class="btn ghost" type="button" aria-haspopup="dialog">About</button>
+      <button id="formatBtn" class="btn" type="button">Format Code</button>
+
+      <div class="split">
+        <button id="exportPng" class="btn primary split-main" type="button" data-export>Export as PNG</button>
+        <button id="exportMore" class="btn primary split-caret" type="button"
+                aria-label="See other export options" aria-expanded="false" aria-controls="exportMenu">
+          <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+
+        <div id="exportMenu" class="menu" hidden>
+          <button class="menu-item" type="button" data-action="save-png" data-export>
+            <span>Save PNG</span><kbd>Ctrl+Shift+E</kbd>
+          </button>
+          <button class="menu-item" type="button" data-action="save-svg" data-export>
+            <span>Save SVG</span>
+          </button>
+          <button class="menu-item" type="button" data-action="copy-image" data-export>
+            <span>Copy Image</span><kbd>Ctrl+Shift+C</kbd>
+          </button>
+          <button class="menu-item" type="button" data-action="copy-url">
+            <span>Copy URL</span>
+          </button>
+
+          <fieldset class="size-group">
+            <legend>Size</legend>
+            <div class="segmented">
+              <label class="seg"><input type="radio" name="scale" value="2"><span>2x</span></label>
+              <label class="seg"><input type="radio" name="scale" value="4"><span>4x</span></label>
+              <label class="seg"><input type="radio" name="scale" value="6"><span>6x</span></label>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="editor-col" aria-label="Editor and preview">
+      <section id="previewPane" class="preview-pane" aria-label="Preview">
+        <div id="stage" class="stage">
+          <div id="frame" class="frame" data-mode="light">
+            <div id="window" class="window">
+              <div id="bar" class="titlebar">
+                <div class="dots">
+                  <span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span>
+                </div>
+                <div class="titles">
+                  <input id="frameTitle" class="t-input t-title-input" type="text" aria-label="Window title" spellcheck="false" autocomplete="off">
+                  <input id="frameSub" class="t-input t-sub-input" type="text" aria-label="Window subtitle" spellcheck="false" autocomplete="off">
+                </div>
+              </div>
+              <div id="body" class="body">
+                <div id="lines" class="lines"></div>
+                <textarea id="frameCode" class="frame-input" aria-label="Code, editable in the image" spellcheck="false" wrap="off" autocomplete="off" autocapitalize="off"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <aside class="controls" aria-label="Settings">
+      <div class="field theme-field">
+        <label id="themeLabel" for="themeBtn">Theme</label>
+        <div class="theme-picker">
+          <button id="themeBtn" class="theme-btn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="themeLabel themeBtn">
+            <span class="swatch" data-swatch></span>
+            <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <ul id="themeMenu" class="theme-menu" role="listbox" aria-labelledby="themeLabel" hidden>
+            <li role="option" tabindex="-1" data-value="candy" aria-selected="true"><span class="swatch swatch-candy"></span>Candy</li>
+            <li role="option" tabindex="-1" data-value="sand" aria-selected="false"><span class="swatch swatch-sand"></span>Sand</li>
+          </ul>
+        </div>
+        <!-- Source of truth for the theme value; the picker above mirrors it. -->
+        <select id="theme" class="visually-hidden" tabindex="-1" aria-hidden="true">
+          <option value="candy">Candy</option>
+          <option value="sand">Sand</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="background">Background</label>
+        <input id="background" class="switch" type="checkbox" role="switch">
+      </div>
+
+      <div class="row">
+        <label for="darkMode">Dark mode</label>
+        <input id="darkMode" class="switch" type="checkbox" role="switch">
+      </div>
+
+      <div class="row">
+        <label for="lineNumbers">Line numbers</label>
+        <input id="lineNumbers" class="switch" type="checkbox" role="switch">
+      </div>
+
+      <fieldset class="field">
+        <legend>Padding</legend>
+        <div class="segmented">
+          <label class="seg"><input type="radio" name="padding" value="16"><span>16</span></label>
+          <label class="seg"><input type="radio" name="padding" value="32"><span>32</span></label>
+          <label class="seg"><input type="radio" name="padding" value="64"><span>64</span></label>
+          <label class="seg"><input type="radio" name="padding" value="128"><span>128</span></label>
+        </div>
+      </fieldset>
+
+      <div class="field">
+        <label for="language">Language</label>
+        <select id="language">
+          <option value="auto">Auto-Detect</option>
+          <option value="csharp">C#</option>
+          <option value="html">HTML</option>
+          <option value="css">CSS</option>
+          <option value="javascript">JavaScript</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="font">Font</label>
+        <select id="font">
+          <option value="jetbrains-mono">JetBrains Mono</option>
+          <option value="geist-mono">Geist Mono</option>
+          <option value="ibm-plex-mono">IBM Plex Mono</option>
+          <option value="fira-code">Fira Code</option>
+          <option value="soehne-mono">Söhne Mono</option>
+          <option value="roboto-mono">Roboto Mono</option>
+          <option value="commit-mono">Commit Mono</option>
+          <option value="space-mono">Space Mono</option>
+          <option value="source-code-pro">Source Code Pro</option>
+          <option value="google-sans-code">Google Sans Code</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="windowChrome">Window chrome</label>
+        <input id="windowChrome" class="switch" type="checkbox" role="switch">
+      </div>
+
+      <div class="field">
+        <label for="subtitle">Subtitle</label>
+        <input id="subtitle" type="text" spellcheck="false" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="width">Width</label>
+        <input id="width" type="number" inputmode="numeric" min="1" max="10000" step="1" placeholder="Automatic">
+        <span class="hint">px, empty = automatic</span>
+      </div>
+
+      <div class="field">
+        <label for="highlighted">Highlighted lines</label>
+        <input id="highlighted" type="text" spellcheck="false" autocomplete="off" placeholder="e.g. 2-4,7">
+      </div>
+    </aside>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="aboutDialog" aria-labelledby="aboutTitle">
+    <form method="dialog" class="dialog-body">
+      <h2 id="aboutTitle">rayCopy</h2>
+      <p>Create beautiful images of your code.</p>
+      <p>rayCopy is a Rust port of <strong>ray.so</strong>, built with Tauri for the desktop.</p>
+      <div class="dialog-actions">
+        <button class="btn primary" type="submit">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

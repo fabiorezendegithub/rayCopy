@@ -1,0 +1,1054 @@
+/* ---------- App chrome tokens ---------- */
+:root {
+  color-scheme: dark;
+  --app-bg: #111114;
+  --app-surface: #19191e;
+  --app-surface-2: #222229;
+  --app-border: #2c2c35;
+  --app-fg: #ededf1;
+  --app-muted: #9b9ba8;
+  --app-accent: #8b7cf6;
+  --app-accent-fg: #ffffff;
+  --app-danger: #ff7a7a;
+  --app-ok: #6fd9a6;
+  --focus-ring: #b7a9ff;
+  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-app-theme="dark"]) {
+    color-scheme: light;
+    --app-bg: #f4f4f7;
+    --app-surface: #ffffff;
+    --app-surface-2: #eeeef3;
+    --app-border: #d9d9e2;
+    --app-fg: #1d1d24;
+    --app-muted: #62626e;
+    --app-accent: #6a5ae0;
+    --app-accent-fg: #ffffff;
+    --app-danger: #c62828;
+    --app-ok: #1b7f4f;
+    --focus-ring: #6a5ae0;
+    --shadow-pop: 0 12px 32px rgba(20, 20, 40, 0.18);
+  }
+}
+
+:root[data-app-theme="light"] {
+  color-scheme: light;
+  --app-bg: #f4f4f7;
+  --app-surface: #ffffff;
+  --app-surface-2: #eeeef3;
+  --app-border: #d9d9e2;
+  --app-fg: #1d1d24;
+  --app-muted: #62626e;
+  --app-accent: #6a5ae0;
+  --app-accent-fg: #ffffff;
+  --app-danger: #c62828;
+  --app-ok: #1b7f4f;
+  --focus-ring: #6a5ae0;
+  --shadow-pop: 0 12px 32px rgba(20, 20, 40, 0.18);
+}
+
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+body {
+  background: var(--app-bg);
+  color: var(--app-fg);
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+p {
+  margin: 0 0 10px;
+  color: var(--app-muted);
+}
+
+strong {
+  color: var(--app-fg);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+kbd {
+  font: 11px ui-monospace, "JetBrains Mono", monospace;
+  padding: 2px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-2);
+  color: var(--app-muted);
+  white-space: nowrap;
+}
+
+/* ---------- Header ---------- */
+.topbar {
+  position: relative;
+  z-index: 20;
+  flex: 0 0 auto;
+  height: 56px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-surface);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.logo {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #a58efb, #e9bff8);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+.brand-name {
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-2);
+  color: var(--app-fg);
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.btn.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--app-muted);
+}
+
+.btn.primary {
+  background: var(--app-accent);
+  border-color: var(--app-accent);
+  color: var(--app-accent-fg);
+  font-weight: 600;
+}
+
+.split {
+  position: relative;
+  display: inline-flex;
+}
+
+.split-main {
+  border-radius: 8px 0 0 8px;
+  border-right-color: rgba(255, 255, 255, 0.18);
+}
+
+.split-caret {
+  border-radius: 0 8px 8px 0;
+  padding: 0 8px;
+  border-left-color: rgba(255, 255, 255, 0.18);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 264px;
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  box-shadow: var(--shadow-pop);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.menu[hidden] {
+  display: none;
+}
+
+.menu-item {
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--app-fg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-item:hover,
+.menu-item:focus-visible {
+  background: var(--app-surface-2);
+}
+
+.menu-item:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.size-group {
+  margin: 6px 0 2px;
+  padding: 8px 10px 10px;
+  border: 0;
+  border-top: 1px solid var(--app-border);
+}
+
+.size-group legend {
+  padding: 0;
+  margin-bottom: 6px;
+  color: var(--app-muted);
+  font-size: 12px;
+}
+
+/* Segmented radio groups (Padding, Size) */
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--app-surface-2);
+  border: 1px solid var(--app-border);
+  gap: 2px;
+}
+
+.seg {
+  position: relative;
+  display: inline-flex;
+}
+
+.seg input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.seg span {
+  min-width: 40px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--app-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.seg input:checked + span {
+  background: var(--app-accent);
+  color: var(--app-accent-fg);
+  font-weight: 600;
+}
+
+.seg input:focus-visible + span {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ---------- Workspace layout ---------- */
+.workspace {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 12px;
+}
+
+.editor-col {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.editor-card {
+  flex: 0 0 auto;
+  min-width: 0;
+  border-radius: 12px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.title-row label {
+  color: var(--app-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.title-row input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-2);
+  outline: none;
+}
+
+.title-row input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 0;
+}
+
+.editor {
+  position: relative;
+  height: 220px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.code-text {
+  font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  tab-size: 2;
+}
+
+.gutter {
+  margin: 0;
+  padding: 12px 12px 12px 14px;
+  min-width: 44px;
+  overflow: hidden;
+  text-align: right;
+  white-space: pre;
+  color: var(--app-muted);
+  opacity: 0.6;
+  user-select: none;
+  background: var(--app-surface-2);
+  border-right: 1px solid var(--app-border);
+}
+
+.editor textarea {
+  margin: 0;
+  padding: 12px 14px;
+  border: 0;
+  resize: none;
+  outline: none;
+  white-space: pre;
+  overflow: auto;
+  background: transparent;
+  color: var(--app-fg);
+  caret-color: var(--app-accent);
+  min-width: 0;
+  height: 100%;
+}
+
+.editor textarea:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
+/* ---------- Preview ---------- */
+.preview-pane {
+  flex: 1 1 auto;
+  min-height: 280px;
+  min-width: 0;
+  border-radius: 12px;
+  border: 1px solid var(--app-border);
+  background:
+    radial-gradient(circle at 1px 1px, var(--app-border) 1px, transparent 0) 0 0 / 18px 18px,
+    var(--app-surface);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+}
+
+.stage {
+  position: relative;
+  flex: 0 0 auto;
+  margin: auto;
+}
+
+.frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: max-content;
+  transform-origin: 0 0;
+  padding: var(--pad, 64px);
+  background: linear-gradient(135deg, var(--bg-from, #a58efb), var(--bg-to, #e9bff8));
+}
+
+.frame.no-bg {
+  background: none;
+}
+
+.window {
+  position: relative;
+  min-width: 0;
+  width: max-content;
+  max-width: none;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--window-bg);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.28),
+    0 2px 8px rgba(0, 0, 0, 0.18);
+  font-family: var(--code-font, ui-monospace, monospace);
+  color: var(--fg, #434447);
+  text-align: left;
+}
+
+/* Frame mode: redefines the window surface for dark mode */
+.frame[data-mode="light"] {
+  --window-bg: #fdfdfe;
+  --window-edge: rgba(0, 0, 0, 0.06);
+}
+
+.frame[data-mode="dark"] {
+  --window-bg: #17171c;
+  --window-edge: rgba(255, 255, 255, 0.08);
+}
+
+.titlebar {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--window-edge);
+  color: var(--comment, #8d949b);
+}
+
+.dots {
+  display: flex;
+  gap: 7px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dot-red {
+  background: #ff5f57;
+}
+
+.dot-yellow {
+  background: #febc2e;
+}
+
+.dot-green {
+  background: #28c840;
+}
+
+.titles {
+  text-align: center;
+  padding: 0 16px;
+  min-width: 0;
+}
+
+.t-title,
+.t-sub {
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.t-title {
+  font-weight: 600;
+}
+
+.t-sub {
+  opacity: 0.8;
+}
+
+.body {
+  padding: 14px 0;
+}
+
+.line {
+  display: flex;
+  align-items: flex-start;
+  font-size: 14px;
+  line-height: 1.7;
+  min-height: 1.7em;
+}
+
+.line.hl {
+  background: var(--highlight, rgba(220, 21, 94, 0.1));
+  box-shadow: inset 3px 0 0 var(--highlight-border, #dc155e);
+}
+
+.ln {
+  flex: 0 0 auto;
+  padding: 0 16px 0 18px;
+  text-align: right;
+  color: var(--comment, #8d949b);
+  opacity: 0.7;
+  user-select: none;
+  white-space: pre;
+}
+
+.code {
+  flex: 1 1 auto;
+  padding: 0 22px 0 20px;
+  white-space: pre;
+  color: var(--fg, #434447);
+}
+
+/* ---------- Controls panel ---------- */
+.controls {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.field legend {
+  padding: 0;
+  margin-bottom: 6px;
+  color: var(--app-muted);
+  font-size: 12px;
+}
+
+.field > label,
+.row > label {
+  color: var(--app-muted);
+  font-size: 12px;
+}
+
+.field .segmented {
+  align-self: flex-start;
+}
+
+.hint {
+  color: var(--app-muted);
+  font-size: 11px;
+}
+
+.controls select,
+.controls input[type="text"],
+.controls input[type="number"] {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-2);
+  outline: none;
+  min-width: 0;
+}
+
+.controls select:focus-visible,
+.controls input[type="text"]:focus-visible,
+.controls input[type="number"]:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 24px;
+}
+
+.row > label {
+  cursor: pointer;
+}
+
+/* Switch */
+.switch {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 20px;
+  margin: 0;
+  border-radius: 999px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-2);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--app-muted);
+  transition: transform 120ms ease, background 120ms ease;
+}
+
+.switch:checked {
+  background: var(--app-accent);
+  border-color: var(--app-accent);
+}
+
+.switch:checked::after {
+  transform: translateX(16px);
+  background: var(--app-accent-fg);
+}
+
+.switch:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translate(-50%, 12px);
+  max-width: calc(100vw - 32px);
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-2);
+  color: var(--app-fg);
+  box-shadow: var(--shadow-pop);
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease, transform 150ms ease;
+  overflow-wrap: anywhere;
+  z-index: 50;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.toast.success {
+  border-color: var(--app-ok);
+}
+
+.toast.error {
+  border-color: var(--app-danger);
+  color: var(--app-danger);
+}
+
+/* ---------- About dialog ---------- */
+dialog {
+  border: 1px solid var(--app-border);
+  border-radius: 14px;
+  background: var(--app-surface);
+  color: var(--app-fg);
+  box-shadow: var(--shadow-pop);
+  padding: 0;
+  width: min(420px, calc(100vw - 32px));
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.dialog-body {
+  padding: 22px 22px 18px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+/* ---------- Small screens: keep the 900px minimum window usable ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
+}
+
+/* ---------- Editable image: title/subtitle fields and the code overlay ---------- */
+
+/* `display: grid` on .titlebar would otherwise override the hidden attribute. */
+.titlebar[hidden] {
+  display: none;
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.t-input {
+  appearance: none;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 1px 6px;
+  border: 0;
+  border-radius: 4px;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  white-space: pre;
+  text-overflow: ellipsis;
+}
+
+.t-input:hover {
+  background: rgba(127, 127, 127, 0.08);
+}
+
+.t-input:focus {
+  background: rgba(127, 127, 127, 0.14);
+}
+
+.t-title-input {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.t-sub-input {
+  font-size: 12px;
+  line-height: 1.5;
+  opacity: 0.8;
+}
+
+.body {
+  position: relative;
+}
+
+.code {
+  tab-size: 2;
+}
+
+/* Transparent textarea laid over the rendered code. It owns the caret and the typing;
+   the coloured spans underneath show the result. Its padding mirrors the line grid:
+   14px top (the .body padding), the line-number column, then the code's 20px. */
+.frame-input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 14px 22px 14px calc(var(--ln-w, 0px) + 20px);
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  background: transparent;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  caret-color: var(--fg, #434447);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.7;
+  letter-spacing: inherit;
+  white-space: pre;
+  tab-size: 2;
+  cursor: text;
+}
+
+.frame-input::selection {
+  background: rgba(127, 127, 127, 0.35);
+  -webkit-text-fill-color: transparent;
+}
+
+/* ---------- Settings strip below the preview (ray.so-style toolbar) ---------- */
+.controls {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px 22px;
+  padding: 14px 18px;
+  overflow: visible;
+}
+
+.controls .field {
+  flex: 0 0 auto;
+}
+
+.controls .row {
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+.controls select {
+  width: auto;
+  min-width: 120px;
+}
+
+.controls input[type="text"],
+.controls input[type="number"] {
+  width: 150px;
+}
+
+.controls .field legend {
+  margin-bottom: 6px;
+}
+
+/* ---------- Theme picker (swatch button + list) ---------- */
+.theme-picker {
+  position: relative;
+}
+
+.theme-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  min-width: 84px;
+  padding: 0 10px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface-2);
+  color: inherit;
+  cursor: pointer;
+}
+
+.theme-btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 0;
+}
+
+.swatch {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  background: var(--app-surface-2);
+}
+
+.swatch-candy {
+  background: linear-gradient(135deg, #a58efb, #e9bff8);
+}
+
+.swatch-sand {
+  background: linear-gradient(135deg, #eed5b6, #af8856);
+}
+
+/* Opens upwards, above the button, so it never runs off the bottom of the window. */
+.theme-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  min-width: 160px;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
+  background: var(--app-surface);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
+.theme-menu[hidden] {
+  display: none;
+}
+
+.theme-menu [role="option"] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--app-muted);
+}
+
+.theme-menu [role="option"]:hover,
+.theme-menu [role="option"]:focus-visible,
+.theme-menu [role="option"][aria-selected="true"] {
+  background: var(--app-surface-2);
+  color: inherit;
+  outline: none;
+}
+
+/* ---------- Line numbers: animated open/close ---------- */
+/* Column always present; closed = zero width, transparent. */
+.ln {
+  box-sizing: border-box;
+  width: 0;
+  padding: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: width 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
+}
+
+.show-ln .ln {
+  width: var(--ln-col);
+  padding: 0 16px 0 18px;
+  opacity: 0.7;
+}
+
+/* The code textarea overlay follows the same column width, animated in step. */
+.body {
+  --ln-cur: 0px;
+}
+
+.body.show-ln {
+  --ln-cur: var(--ln-col);
+}
+
+.frame-input {
+  padding-left: calc(var(--ln-cur, 0px) + 20px);
+  transition: padding-left 0.3s ease;
+}
+
+/* ---------- Light mode chrome (measured from ray.so, Sand light) ---------- */
+.frame[data-mode="light"] .dot {
+  background: #c7c2bb;
+}
+
+.frame[data-mode="light"] .titlebar {
+  color: #aba59f;
+}
+
+.frame[data-mode="light"] .ln {
+  color: #c6c0b9;
+  opacity: 1;
+}
+
+.frame[data-mode="light"] .show-ln .ln {
+  opacity: 1;
+}
+
+/* ---------- Dark mode chrome (measured from ray.so, Sand dark) ---------- */
+.frame[data-mode="dark"] .dot {
+  background: rgba(255, 255, 255, 0.23);
+}
+
+.frame[data-mode="dark"] .titlebar {
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.frame[data-mode="dark"] .ln,
+.frame[data-mode="dark"] .show-ln .ln {
+  color: rgba(255, 255, 255, 0.22);
+  opacity: 1;
+}
+
+/* 1px light outline inside the window edge. */
+.frame[data-mode="dark"] .window {
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.28),
+    0 2px 8px rgba(0, 0, 0, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.26);
+}
