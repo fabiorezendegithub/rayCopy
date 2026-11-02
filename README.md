@@ -33,7 +33,7 @@ Não precisa de Node.js, npm nem da CLI do Tauri.
 ## Como usar
 
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/fabiorezendegithub/rayCopy.git
 cd rayCopy
 cargo run
 ```
